@@ -15,7 +15,7 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
-  <arg name="world_name" value="$(find exp_assignment2)/worlds/$(arg world).world"/>
+  <arg name="world_name" value="$(find erl_second_assignment)/worlds/$(arg world).world"/>
   <arg name="respawn_gazebo" default="false"/>
   <arg name="use_clock_frequency" default="false"/>
   <arg name="pub_clock_frequency" default="100"/>
@@ -47,13 +47,13 @@
 
   <arg name="ns1" value="robot"/>
   <param name="$(arg ns1)/robot_description" 
-	 command="$(find xacro)/xacro --inorder $(find exp_assignment2)/urdf/robot.xacro" />
+	 command="$(find xacro)/xacro --inorder $(find erl_second_assignment)/urdf/robot.xacro" />
 	
   <arg name="ns2" value="ball"/> 
 	 <param name="$(arg ns2)/ball_description" 
-	 command="$(find xacro)/xacro --inorder $(find exp_assignment2)/urdf/ball.xacro" />
+	 command="$(find xacro)/xacro --inorder $(find erl_second_assignment)/urdf/ball.xacro" />
 	
-	 <param name="human_description1" textfile="$(find exp_assignment2)/urdf/human.urdf" />
+	 <param name="human_description1" textfile="$(find erl_second_assignment)/urdf/human.urdf" />
       
   <node name="urdf_spawner_human1" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
         args="-urdf -model human1 -param human_description1 -x -7 -y 7 -z 0.34 -R 0 -P 0 -Y 0"/>
@@ -66,7 +66,7 @@
   <group ns="$(arg ns2)">
   	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -model $(arg ns2) -param ball_description -x -7 -y 6 -z 0.25"/>
-	<node name="position_server" pkg="exp_assignment2" type="go_to_point_ball.py" output="screen" />
+	<node name="position_server" pkg="erl_second_assignment" type="go_to_point_ball.py" output="screen" />
   </group>
 
 </launch>
