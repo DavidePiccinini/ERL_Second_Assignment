@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <robot>
-  <!-- materials -->
- 
-  
+
+  <!-- Materials -->
   <gazebo reference="link_chassis">
     <material>Gazebo/Orange</material>
   </gazebo>
@@ -12,7 +11,17 @@
   <gazebo reference="link_right_wheel">
     <material>Gazebo/Blue</material>
   </gazebo>
+  <gazebo reference="link_neck">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="link_head">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="camera_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
 
+  <!-- Differential control drive -->
   <gazebo>
     <plugin filename="libgazebo_ros_diff_drive.so" name="differential_drive_controller">
       <legacyMode>true</legacyMode>
@@ -33,12 +42,11 @@
   <!-- ros_control plugin -->
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-     <!-- <robotNamespace>/robot</robotNamespace> -->
       <legacyModeNS>true</legacyModeNS>
     </plugin>
   </gazebo>
 
-   <!-- camera -->
+  <!-- RGB camera -->
   <gazebo reference="camera_link">
     <sensor type="camera" name="camera1">
       <update_rate>30.0</update_rate>
@@ -53,7 +61,7 @@
           <near>0.02</near>
           <far>300</far>
         </clip>
-		<noise>
+		    <noise>
           <type>gaussian</type>
           <mean>0.0</mean>
           <stddev>0.007</stddev>
@@ -75,6 +83,5 @@
       </plugin>
     </sensor>
   </gazebo> 
-
 
 </robot>

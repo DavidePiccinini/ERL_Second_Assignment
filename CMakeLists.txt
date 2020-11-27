@@ -171,6 +171,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
   scripts/go_to_point_ball.py
+  scripts/go_to_point_robot.py
+  scripts/person.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
