@@ -37,6 +37,7 @@
   <group if="$(arg use_clock_frequency)">
     <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)"/>
   </group>
+
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
 	      args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"/>
 	
@@ -48,7 +49,7 @@
   <!-- Load the robot and ball descriptions -->
   <arg name="ns1" value="robot"/>
     <param name="$(arg ns1)/robot_description" command="$(find xacro)/xacro --inorder $(find erl_second_assignment)/urdf/robot.xacro"/>
-	
+  
   <arg name="ns2" value="ball"/> 
 	  <param name="$(arg ns2)/ball_description" command="$(find xacro)/xacro --inorder $(find erl_second_assignment)/urdf/ball.xacro"/>
 	  <param name="human_description1" textfile="$(find erl_second_assignment)/urdf/human.urdf"/>
@@ -59,16 +60,22 @@
 
   <!-- Spawn the robot and run its corresponding action server -->
   <group ns="$(arg ns1)">
+    <rosparam file="$(find erl_second_assignment)/config/motors_config.yaml" command="load" ns="/$(arg ns1)"/>
   	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	        args="-urdf -model $(arg ns1) -param robot_description -x -5 -y 7 -Y 3.14 -z 0.05"/>
-    <node name="position_server" pkg="erl_second_assignment" type="go_to_point_robot.py" output="screen"/>"
+    <node name="position_server_robot" pkg="erl_second_assignment" type="go_to_point_robot.py" output="screen"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="--namespace=/$(arg ns1)
+      joint_state_controller
+      joint1_position_controller
+      --shutdown-timeout 3">
+    </node>
   </group>
   
   <!-- Spawn the ball and run its corresponding action server -->
   <group ns="$(arg ns2)">
   	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	        args="-urdf -model $(arg ns2) -param ball_description -x -7 -y 6 -z 0.25"/>
-	  <node name="position_server" pkg="erl_second_assignment" type="go_to_point_ball.py" output="screen"/>
+	  <node name="position_server_ball" pkg="erl_second_assignment" type="go_to_point_ball.py" output="screen"/>
   </group>
 
 </launch>

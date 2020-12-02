@@ -77,7 +77,7 @@ if __name__ == "__main__":
         rospy.init_node('person')
 
         # Create the action client and wait for the server
-        actC = actionlib.SimpleActionClient("person_client", erl_second_assignment.msg.PlanningAction)
+        actC = actionlib.SimpleActionClient("ball/reaching_goal", erl_second_assignment.msg.PlanningAction)
         actC.wait_for_server()
 
         person()

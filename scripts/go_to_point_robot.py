@@ -76,11 +76,11 @@ def fix_yaw(des_pos):
     
     twist_msg = Twist()
     if math.fabs(err_yaw) > yaw_precision_2_:
-        twist_msg.angular.z = kp_a*err_yaw 
+        twist_msg.angular.z = kp_a * err_yaw 
         if twist_msg.angular.z > ub_a:
-		    twist_msg.angular.z = ub_a
-        elif twist_msg.angular.z < lb_a: 
-			twist_msg.angular.z = lb_a
+            twist_msg.angular.z = ub_a
+        elif twist_msg.angular.z < lb_a:
+            twist_msg.angular.z = lb_a
     
     pub.publish(twist_msg)
     
@@ -101,7 +101,7 @@ def go_straight_ahead(des_pos):
         twist_msg = Twist()
         twist_msg.linear.x = 0.3
         if twist_msg.linear.x > ub_d:
-			twist_msg.linear.x = ub_d
+            twist_msg.linear.x = ub_d
         
         twist_msg.angular.z = kp_a*err_yaw
         pub.publish(twist_msg)
@@ -167,13 +167,16 @@ def planning(goal):
 
 def main():
     global pub, act_s
-    rospy.init_node('go_to_point')
+    rospy.init_node('go_to_point_robot')
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
     sub_odom = rospy.Subscriber('/odom', Odometry, clbk_odom)
-    act_s = actionlib.SimpleActionServer('/reaching_goal', erl_second_assignment.msg.PlanningAction, planning, auto_start = False)
+    act_s = actionlib.SimpleActionServer('reaching_goal', erl_second_assignment.msg.PlanningAction, planning, auto_start = False)
     act_s.start()
     
     rate = rospy.Rate(20)
     
     while not rospy.is_shutdown():
         rate.sleep()
+
+if __name__ == '__main__':
+    main()

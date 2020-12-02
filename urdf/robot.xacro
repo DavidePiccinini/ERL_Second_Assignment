@@ -219,4 +219,17 @@
 	    <child link="camera_link"/> 
 	 </joint>
 
+
+  <!-- Transmissions -->
+  <transmission name="joint_head_trans">
+	  <type>transmission_interface/SimpleTransmission</type>
+	  <joint name="joint_head">
+		  <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+	  </joint>
+	  <actuator name="motor1">
+		  <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+		  <mechanicalInterface>1</mechanicalInterface>
+	  </actuator>
+  </transmission>
+
 </robot>
