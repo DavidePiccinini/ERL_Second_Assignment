@@ -52,9 +52,10 @@
   
   <arg name="ns2" value="ball"/> 
 	  <param name="$(arg ns2)/ball_description" command="$(find xacro)/xacro --inorder $(find erl_second_assignment)/urdf/ball.xacro"/>
-	  <param name="human_description1" textfile="$(find erl_second_assignment)/urdf/human.urdf"/>
+	  
+  <param name="human_description1" textfile="$(find erl_second_assignment)/urdf/human.urdf"/>
       
-  <!-- Spawn the human model and run the node moving the ball -->
+  <!-- Spawn the human model -->
   <node name="urdf_spawner_human1" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
         args="-urdf -model human1 -param human_description1 -x -7 -y 7 -z 0.34 -R 0 -P 0 -Y 0"/>
 
@@ -77,5 +78,11 @@
 	        args="-urdf -model $(arg ns2) -param ball_description -x -7 -y 6 -z 0.25"/>
 	  <node name="position_server_ball" pkg="erl_second_assignment" type="go_to_point_ball.py" output="screen"/>
   </group>
+
+  <!-- Execute the finite state machine controlling the robot behaviour -->
+  
+
+  <!-- Run the node moving the ball  -->
+  <node name="person_controller" pkg="erl_second_assignment" type="person.py" output="screen"/>
 
 </launch>

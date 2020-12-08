@@ -13,6 +13,7 @@ import erl_second_assignment.msg
 # Action client
 actC = None
 
+# Goal pose
 pos = PoseStamped()
 
 ##
@@ -25,16 +26,21 @@ def moveBall():
 
     pos.pose.position.x = x
     pos.pose.position.y = y
-    pos.pose.position.z = 0
+    pos.pose.position.z = 0.25
 
     # Create the goal
-    goal = erl_second_assignment.msg.PlanningActionGoal(targetPose=pos)
+    goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
+
+    # Print a feedback message
+    print("\nPerson: moving the ball to position [%d, %d].\n" %(x, y))
 
     # Send the goal
     actC.send_goal(goal)
 
     # Wait until the ball has reached the destination
     actC.wait_for_result()
+
+    time.sleep(10)
 
 ##
 # 
@@ -46,13 +52,18 @@ def disappearBall():
     pos.pose.position.z = -3
 
     # Create the goal
-    goal = erl_second_assignment.msg.PlanningActionGoal(targetPose=pos)
+    goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
+
+    # Print a feedback message
+    print("\nPerson: making the ball disappear.\n")
 
     # Send the goal
     actC.send_goal(goal)
 
     # Wait until the ball has reached the destination
     actC.wait_for_result()
+
+    time.sleep(30)
 
 ##
 # 
@@ -68,7 +79,7 @@ def person():
         else:
             disappearBall()
 
-        time.sleep(20)
+        # time.sleep(20)
 
 
 if __name__ == "__main__":

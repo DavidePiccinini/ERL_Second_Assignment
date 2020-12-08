@@ -173,6 +173,7 @@ install(PROGRAMS
   scripts/go_to_point_ball.py
   scripts/go_to_point_robot.py
   scripts/person.py
+  scripts/state_machine.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
