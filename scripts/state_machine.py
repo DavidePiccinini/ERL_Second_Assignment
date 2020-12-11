@@ -11,6 +11,11 @@ import smach_ros
 import time
 import random
 import actionlib
+import cv2
+import imutils
+import numpy as np
+from scipy.ndimage import filters
+from actionlib_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import String
 from sensor_msgs.msg import CompressedImage
@@ -32,31 +37,37 @@ sleepCounter = 0
 ballFound = False
 
 ##
-# Calls the "robot_control" service
-# @param x The x position of the destination
-# @param y The y position of the destination
-# def robotControlCall(x, y):
+# 
+def checkForBall(self, ros_data):
+    global ballFound
 
-#     rospy.wait_for_service('robot_control')
-#     try:
+    # Direct conversion to CV2
+    np_arr = np.fromstring(ros_data.data, np.uint8)
+    image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)  # OpenCV >= 3.0:
 
-#         robot_control = rospy.ServiceProxy('robot_control', MoveRobot)
-#         response = robot_control(x, y)
-#         return response.goalReached
+    greenLower = (50, 50, 20)
+    greenUpper = (70, 255, 255)
 
-#     except rospy.ServiceException as e:
+    blurred = cv2.GaussianBlur(image_np, (11, 11), 0)
+    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, greenLower, greenUpper)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
 
-#         print("Service call failed %s.\n"%e)
+    cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    center = None
+
+    # Only proceed if at least one contour was found
+    if len(cnts) > 0:
+        # Set the flag to True
+        ballFound = True
 
 ## 
-# Callback for the 'voice_command' topic
-# @param data The voice command
-# def receivedVoiceCommand(data):
-
-#     global playState
-
-#     # Change the robot state flag
-#     playState = True
+# 
+def trackBall(self, ros_data):
+    global ballFound
+    #
 
 ## 
 # Callback for the 'pointing_gesture' topic
@@ -86,16 +97,14 @@ class Normal(smach.State):
         self.sleepThreshold = random.randint(5, 10)
 
     def execute(self, userdata):
-        
         print('State machine: Executing state NORMAL.\n')
 
         global sleepCounter
         global ballFound
 
-        rospy.Subscriber("robot/output/image_raw/compressed", CompressedImage, queue_size=1)
+        imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, checkForBall,  queue_size=1)
 
         while sleepCounter < self.sleepThreshold:
-
             # Get a random location on the plane
             x = random.randint(-7, 7)
             y = random.randint(-7, 7)
@@ -112,29 +121,27 @@ class Normal(smach.State):
 
             while actC.getState() != GoalStatus.SUCCEEDED:
                 if ballFound:
+                    # Set the flag back to False
+                    ballFound = False
+
+                    # Preempt the current goal
                     actC.cancel_goal()
 
-        # time.sleep(5 / timeScale)
+                    # Unsubscribe to the image topic
+                    imageSub.unregister()
 
-        # # Move randomly until the robot is sleepy
-        # while sleepCounter < self.sleepThreshold:
+                    # Go into the PLAY state
+                    print('NORMAL state: The robot saw the ball and wants to play.\n')
+                    return 'play'
 
-        #     if playState == True:
-        #         # Go into the PLAY state
-        #         print('NORMAL state: The robot is eager to play.\n')
-        #         return 'play'
+                time.sleep(0.5)
 
-        #     x = random.randint(0, mapx)
-        #     y = random.randint(0, mapy)
+            # Increment the counter
+            sleepCounter += 1
 
-        #     goalReached = robotControlCall(x, y)
-        #     if goalReached == True:
-
-        #         sleepCounter+=1
-        
-        # # Go into the SLEEP state
-        # print('NORMAL state: The robot is sleepy.\n')
-        # return 'sleep'
+        # Go into the SLEEP state
+        print('NORMAL state: The robot is sleepy.\n')
+        return 'sleep'
 
 ##
 # Define Sleep state
@@ -143,62 +150,69 @@ class Sleep(smach.State):
         smach.State.__init__(self, outcomes=['wakeup'])
 
     def execute(self, userdata):
-        
-        # rospy.set_param("robot/state", "sleep")
-        # print('State machine: Executing state SLEEP.\n')
+        print('State machine: Executing state SLEEP.\n')
 
-        # global sleepCounter
+        global sleepCounter
 
-        # time.sleep(5 / timeScale)
+        # Get the home location on the plane
+        x = -5
+        y = 7
 
-        # # Call robot control service to go "home"
-        # robotControlCall(homex, homey)
-        # print('SLEEP state: The robot has arrived home.\n')
+        pos.pose.position.x = x
+        pos.pose.position.y = y
+        pos.pose.position.z = 0.05
 
-        # # Sleep for a random amount of seconds
-        # time.sleep(random.randint(10, 15) / timeScale)
+        # Create the goal
+        goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
 
-        # # Go back to the NORMAL state
-        # sleepCounter = 0
-        # print('SLEEP state: The robot woke up.\n')
-        # return 'wakeup'
+        # Send the goal
+        actC.send_goal(goal)
+
+        # Wait until the robot has reached the destination
+        actC.wait_for_result()
+
+        print('SLEEP state: The robot has arrived home.\n')
+
+        # Sleep for a random amount of seconds
+        #time.sleep(random.randint(10, 15))
+        time.sleep(5)
+
+        # Go back to the NORMAL state
+        sleepCounter = 0
+        print('SLEEP state: The robot woke up.\n')
+        return 'wakeup'
 
 ##
 # Define Play state
 class Play(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['stopplaying'])
-        
-        # rospy.Subscriber('pointing_gesture', Location, receivedPointingGesture)
 
         # Threshold
-        # self.timeThreshold = random.randint(30, 100)
+        self.timeThreshold = random.randint(30, 40)
 
     def execute(self, userdata):
+        print('State machine: Executing state PLAY.\n')
 
-        # rospy.set_param("robot/state", "play")
-        # print('State machine: Executing state PLAY\n')
+        global sleepCounter
+        global ballFound
 
-        # global sleepCounter
+        imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall,  queue_size=1)
 
-        # timePassed = 0
+        timePassed = 0
 
-        # time.sleep(5 / timeScale)
+        # Keep incrementing the time counter if the robot doesn't see the ball
+        while timePassed < self.timeThreshold:
+            # Check if the velocity of the robot is 0: if so, move the head
 
-        # # Call robot control service to go to the person's position
-        # robotControlCall(personx, persony)
-        # print('PLAY state: The robot reached the person.\n')
-        # sleepCounter+=1
-
-        # # Keep incrementing the time counter if the person doesn't point locations
-        # while timePassed < self.timeThreshold:
-
-        #     timePassed+=1
-        #     time.sleep(1 / timeScale)
+            if ballFound == False:
+                time.sleep(1)
+                timePassed += 1
         
-        # # Go back to the NORMAL state
-        # print("PLAY state: The robot doesn't want to play anymore.\n")
-        # return 'stopplaying'
+        # Go back to the NORMAL state
+        imageSub.unregister()
+        print("PLAY state: The robot hasn't seen the ball for a while, so it stops playing.\n")
+        return 'stopplaying'
 
 ##
 # State machine initialization
