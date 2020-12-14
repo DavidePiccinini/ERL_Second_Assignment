@@ -54,7 +54,7 @@ def clbk_odom(msg):
 def change_state(state):
     global state_
     state_ = state
-    print('State changed to [%s]' %state_)
+    print('Ball: state changed to [%s]' %state_)
 
 def go_straight_ahead(des_pos):
     global pub, state_, z_back
@@ -87,7 +87,7 @@ def go_straight_ahead(des_pos):
         pub.publish(twist_msg)
 
     else:
-        print ('Position error: [%s]' % err_pos)
+        print('Ball: position error [%s]' % err_pos)
         change_state(1)
 
 def done():
@@ -114,7 +114,7 @@ def planning(goal):
 
     while not rospy.is_shutdown():
         if act_s.is_preempt_requested():
-            rospy.loginfo('Goal was preempted')
+            print('Ball: goal was preempted')
             act_s.set_preempted()
             success = False
             break
@@ -134,7 +134,7 @@ def planning(goal):
 
         rate.sleep()
     if success:
-        rospy.loginfo('Goal: Succeeded!')
+        print('Ball: goal succeeded!')
         act_s.set_succeeded(result)
 
 

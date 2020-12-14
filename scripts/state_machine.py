@@ -30,15 +30,12 @@ pos = PoseStamped()
 ## Counter
 sleepCounter = 0
 
-## Flag for notifying 
-# playState = False
-
 ## Flag to notify that the robot has seen the ball
 ballFound = False
 
 ##
 # 
-def checkForBall(self, ros_data):
+def checkForBall(ros_data):
     global ballFound
 
     # Direct conversion to CV2
@@ -56,7 +53,6 @@ def checkForBall(self, ros_data):
 
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
-    center = None
 
     # Only proceed if at least one contour was found
     if len(cnts) > 0:
@@ -65,27 +61,10 @@ def checkForBall(self, ros_data):
 
 ## 
 # 
-def trackBall(self, ros_data):
+def trackBall(ros_data):
     global ballFound
+    ballFound = False
     #
-
-## 
-# Callback for the 'pointing_gesture' topic
-# @param data The pointed location
-# def receivedPointingGesture(data):
-
-#     global sleepCounter
-    
-#     # Go to the pointed location
-#     goalReached = robotControlCall(data.x, data.y)
-#     if goalReached == True:
-
-#         # Return to the person's position
-#         robotControlCall(personx, persony)
-#         print('PLAY state: The robot reached the person.\n')
-
-#         # Increment the counter
-#         sleepCounter+=1
 
 ##
 # Define Normal state
@@ -94,13 +73,16 @@ class Normal(smach.State):
         smach.State.__init__(self, outcomes=['sleep','play'])
 
         # Threshold
-        self.sleepThreshold = random.randint(5, 10)
+        # self.sleepThreshold = random.randint(5, 10)
+        self.sleepThreshold = 3
 
     def execute(self, userdata):
         print('State machine: Executing state NORMAL.\n')
 
         global sleepCounter
         global ballFound
+        global actC
+        global pos
 
         imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, checkForBall,  queue_size=1)
 
@@ -111,7 +93,7 @@ class Normal(smach.State):
 
             pos.pose.position.x = x
             pos.pose.position.y = y
-            pos.pose.position.z = 0.05
+            pos.pose.orientation.w = 0
 
             # Create the goal
             goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
@@ -119,8 +101,8 @@ class Normal(smach.State):
             # Send the goal
             actC.send_goal(goal)
 
-            while actC.getState() != GoalStatus.SUCCEEDED:
-                if ballFound:
+            while actC.get_state() != GoalStatus.SUCCEEDED:
+                if ballFound == True:
                     # Set the flag back to False
                     ballFound = False
 
@@ -134,7 +116,7 @@ class Normal(smach.State):
                     print('NORMAL state: The robot saw the ball and wants to play.\n')
                     return 'play'
 
-                time.sleep(0.5)
+            #     #time.sleep(2)
 
             # Increment the counter
             sleepCounter += 1
@@ -153,6 +135,8 @@ class Sleep(smach.State):
         print('State machine: Executing state SLEEP.\n')
 
         global sleepCounter
+        global actC
+        global pos
 
         # Get the home location on the plane
         x = -5
@@ -160,7 +144,7 @@ class Sleep(smach.State):
 
         pos.pose.position.x = x
         pos.pose.position.y = y
-        pos.pose.position.z = 0.05
+        pos.pose.orientation.w = 0
 
         # Create the goal
         goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
@@ -189,13 +173,15 @@ class Play(smach.State):
         smach.State.__init__(self, outcomes=['stopplaying'])
 
         # Threshold
-        self.timeThreshold = random.randint(30, 40)
+        # self.timeThreshold = random.randint(30, 40)
+        self.timeThreshold = 5
 
     def execute(self, userdata):
         print('State machine: Executing state PLAY.\n')
 
         global sleepCounter
         global ballFound
+        # global actC
 
         imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall,  queue_size=1)
 
@@ -218,6 +204,8 @@ class Play(smach.State):
 # State machine initialization
 def main():
     rospy.init_node('robot_behaviour', anonymous=True)
+
+    global actC
 
     # Create the action client and wait for the server
     actC = actionlib.SimpleActionClient("robot/reaching_goal", erl_second_assignment.msg.PlanningAction)

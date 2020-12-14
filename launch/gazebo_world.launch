@@ -80,9 +80,9 @@
   </group>
 
   <!-- Execute the finite state machine controlling the robot behaviour -->
-  
+  <node name="robot_state_machine" pkg="erl_second_assignment" type="state_machine.py" output="screen" required="true"/>
 
   <!-- Run the node moving the ball  -->
-  <node name="person_controller" pkg="erl_second_assignment" type="person.py" output="screen"/>
+  <!-- <node name="person_controller" pkg="erl_second_assignment" type="person.py" output="screen"/> -->
 
 </launch>

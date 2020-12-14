@@ -48,7 +48,7 @@
 
   <!-- Links -->
 
-	  <link name="link_chassis">
+	<link name="link_chassis">
     <!-- pose and inertial -->
     <pose>0 0 0.1 0 0 0</pose>
     <inertial>
@@ -84,7 +84,7 @@
     </visual>
   </link>
 
-   <link name="link_right_wheel">
+  <link name="link_right_wheel">
     <xacro:default_inertial mass="0.2"/>
     <collision name="link_right_wheel_collision">
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
@@ -97,7 +97,7 @@
     </visual>
   </link>
 
-   <link name="link_left_wheel">
+  <link name="link_left_wheel">
     <xacro:default_inertial mass="0.2"/>
     <collision name="link_left_wheel_collision">
       <origin rpy="0 1.5707 1.5707" xyz="0 0 0"/>
@@ -127,7 +127,7 @@
       <geometry>
         <cylinder radius="0.06" length="0.25"/>
       </geometry>
-      <material name="red" />
+      <material name="orange" />
   	</visual>
   </link>
 
@@ -148,7 +148,7 @@
       <geometry>
         <box size="0.15 0.1 0.1"/>
       </geometry>
-      <material name="red" />
+      <material name="orange" />
   	</visual>
   </link>
 
@@ -197,11 +197,10 @@
   </joint>
 
   <joint name="joint_neck" type="fixed">
-	    <axis xyz="0 1 0" />
-	    <origin xyz="0.15 0 0.035" rpy="0 0 0"/>
-	    <parent link="link_chassis"/>
-	    <child link="link_neck"/> 
-	 </joint>
+	  <origin xyz="0.15 0 0.035" rpy="0 0 0"/>
+	  <parent link="link_chassis"/>
+	  <child link="link_neck"/> 
+	</joint>
 
   <joint name="joint_head" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0.25"/>
@@ -213,11 +212,10 @@
   </joint> 
 
   <joint name="camera_joint" type="fixed">
-	    <axis xyz="0 1 0" />
-	    <origin xyz="0.11 0 0.06" rpy="0 0 0"/>
-	    <parent link="link_head"/>
-	    <child link="camera_link"/> 
-	 </joint>
+	  <origin xyz="0.11 0 0.06" rpy="0 0 0"/>
+	  <parent link="link_head"/>
+	  <child link="camera_link"/> 
+	</joint>
 
 
   <!-- Transmissions -->

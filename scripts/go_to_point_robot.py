@@ -27,7 +27,7 @@ desired_position_.z = 0
 yaw_precision_ = math.pi / 9 # +/- 20 degree allowed
 yaw_precision_2_ = math.pi / 90 # +/- 2 degree allowed
 dist_precision_ = 0.1
-kp_a = 3.0
+kp_a = -3.0
 kp_d = 0.2
 ub_a = 0.6
 lb_a = -0.5
@@ -61,7 +61,7 @@ def clbk_odom(msg):
 def change_state(state):
     global state_
     state_ = state
-    print('State changed to [%s]' %state_)
+    print('Robot: state changed to [%s]' %state_)
 
 def normalize_angle(angle):
     if(math.fabs(angle) > math.pi):
@@ -72,7 +72,7 @@ def fix_yaw(des_pos):
     global yaw_, pub, yaw_precision_2_, state_
     desired_yaw = math.atan2(des_pos.y - position_.y, des_pos.x - position_.x)
     err_yaw = normalize_angle(desired_yaw - yaw_)
-    rospy.loginfo(err_yaw)
+    # rospy.loginfo(err_yaw)
     
     twist_msg = Twist()
     if math.fabs(err_yaw) > yaw_precision_2_:
@@ -86,7 +86,7 @@ def fix_yaw(des_pos):
     
     # State change conditions
     if math.fabs(err_yaw) <= yaw_precision_2_:
-        print('Yaw error: [%s]' %err_yaw)
+        print('Robot: yaw error [%s]' %err_yaw)
         change_state(1)
 
 def go_straight_ahead(des_pos):
@@ -95,7 +95,7 @@ def go_straight_ahead(des_pos):
     err_yaw = desired_yaw - yaw_
     err_pos = math.sqrt(pow(des_pos.y - position_.y, 2) + pow(des_pos.x - position_.x, 2))
     err_yaw = normalize_angle(desired_yaw - yaw_)
-    rospy.loginfo(err_yaw)
+    # rospy.loginfo(err_yaw)
 	
     if err_pos > dist_precision_:
         twist_msg = Twist()
@@ -106,12 +106,12 @@ def go_straight_ahead(des_pos):
         twist_msg.angular.z = kp_a*err_yaw
         pub.publish(twist_msg)
     else:
-        print('Position error: [%s]' %err_pos)
+        print('Robot: position error [%s]' %err_pos)
         change_state(2)
     
     # state change conditions
     if math.fabs(err_yaw) > yaw_precision_:
-        print('Yaw error: [%s]' %err_yaw)
+        print('Robot: yaw error [%s]' %err_yaw)
         change_state(0)
 
 def done():
@@ -137,7 +137,7 @@ def planning(goal):
 	
 	while not rospy.is_shutdown():
 		if act_s.is_preempt_requested():
-			rospy.loginfo('Goal was preempted')
+			print('Robot: goal was preempted')
 			act_s.set_preempted()
 			success = False
 			break
@@ -162,14 +162,14 @@ def planning(goal):
 		
 		rate.sleep()
 	if success:
-		rospy.loginfo('Goal: Succeeded!')
+		print('Robot: goal succeeded!')
 		act_s.set_succeeded(result)
 
 def main():
     global pub, act_s
     rospy.init_node('go_to_point_robot')
-    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-    sub_odom = rospy.Subscriber('/odom', Odometry, clbk_odom)
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+    sub_odom = rospy.Subscriber('odom', Odometry, clbk_odom)
     act_s = actionlib.SimpleActionServer('reaching_goal', erl_second_assignment.msg.PlanningAction, planning, auto_start = False)
     act_s.start()
     
