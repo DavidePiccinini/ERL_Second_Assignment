@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+## @package go_to_point_robot
+# Implements an action server that moves the robot.
+
 # Import ros stuff
 import rospy
 from sensor_msgs.msg import LaserScan

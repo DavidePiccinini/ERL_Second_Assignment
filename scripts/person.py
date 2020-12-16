@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 ## @package person
-# 
+# Mimics the behaviour of a person controlling the robot.
+# The person can move the ball to a certain goal position or can make 
+# it disappear.
 
 import rospy
 import time
@@ -17,7 +19,9 @@ actC = None
 pos = PoseStamped()
 
 ##
-#
+# Sends a goal to the ball's action server to move it to a random 
+# position. After the ball has reached the destination the person
+# wait some time before issuing another command.
 def moveBall():
     # Get a random location on the plane
     x = random.randint(-7, 0)
@@ -42,7 +46,7 @@ def moveBall():
     time.sleep(10)
 
 ##
-# 
+# Makes the ball disappear by making it go under the plane.
 def disappearBall():
     # Make the ball go under the plane
     pos.pose.position.x = 0
@@ -64,7 +68,7 @@ def disappearBall():
     time.sleep(20)
 
 ##
-# 
+# Randomly perfoms one of the two available commands.
 def person():
 
     # Send commands to the ball sporadically

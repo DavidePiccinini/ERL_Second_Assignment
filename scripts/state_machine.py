@@ -45,7 +45,8 @@ ballFound = False
 robotStopped = False
 
 ##
-# 
+# Use OpenCV to check if the robot camera has detected a ball.
+# @param ros_data The compressed image picked up by the camera
 def checkForBall(ros_data):
     global ballFound
 
@@ -69,12 +70,16 @@ def checkForBall(ros_data):
         ballFound = True
 
 ## 
-# 
+# Use OpenCV to check if the robot camera has detected a ball: if so,
+# move the robot until the ball is at the center of the image and has
+# a certain radius. When the robot stops, raise a flag.
+# @param ros_data The compressed image picked up by the camera
 def trackBall(ros_data):
     global ballFound
     global robotStopped
     global velPub
 
+    # If the robot is rotating the camera then simply return
     if robotStopped == True:
         return
     
@@ -107,6 +112,7 @@ def trackBall(ros_data):
             vel.angular.z = 0.002*(center[0]-400)
             vel.linear.x = -0.01*(radius-100)
 
+            # Saturation
             if vel.linear.x > 0.6:
                 vel.linear.x = 0.6
             elif vel.linear.x < -0.6:
@@ -162,6 +168,8 @@ class Normal(smach.State):
             # Send the goal
             actC.send_goal(goal)
 
+            # If the ball is detected while the robot is moving towards 
+            # the goal, preempt it and change the state to PLAY
             while actC.get_state() != GoalStatus.SUCCEEDED:
                 if ballFound == True:
                     # Set the flag back to False
@@ -249,9 +257,7 @@ class Play(smach.State):
         while True:
             # Check if the velocity of the robot is 0: if so, move the head
             if robotStopped == True:
-                # Stop receiving images temporarily
-                # imageSub.unregister()
-
+                # Keep the robot still
                 vel = Twist()
                 vel.angular.z = 0
                 vel.linear.x = 0
@@ -290,7 +296,6 @@ class Play(smach.State):
 
                 robotStopped = False
                 sleepCounter += 1
-                # imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall)
 
             # If the robot doesn't see the ball for a certain period of time then go back to the NORMAL state
             if ballFound == False:
@@ -306,6 +311,7 @@ class Play(smach.State):
                     # Go back to the NORMAL state
                     print("PLAY state: The robot hasn't seen the ball for a while, so it stops playing.\n")
                     return 'stopplaying'
+                    
         time.sleep(1)
         
         
