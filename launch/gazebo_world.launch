@@ -55,9 +55,10 @@
 	  
   <param name="human_description1" textfile="$(find erl_second_assignment)/urdf/human.urdf"/>
       
-  <!-- Spawn the human model -->
+  <!-- Spawn the human model and run the node moving the ball -->
   <node name="urdf_spawner_human1" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
         args="-urdf -model human1 -param human_description1 -x -7 -y 7 -z 0.34 -R 0 -P 0 -Y 0"/>
+  <node name="person_controller" pkg="erl_second_assignment" type="person.py" output="screen"/>
 
   <!-- Spawn the robot and run its corresponding action server -->
   <group ns="$(arg ns1)">
@@ -75,14 +76,11 @@
   <!-- Spawn the ball and run its corresponding action server -->
   <group ns="$(arg ns2)">
   	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-	        args="-urdf -model $(arg ns2) -param ball_description -x -7 -y 6 -z 0.25"/>
+	        args="-urdf -model $(arg ns2) -param ball_description -x -7 -y 6 -z -3"/>
 	  <node name="position_server_ball" pkg="erl_second_assignment" type="go_to_point_ball.py" output="screen"/>
   </group>
 
   <!-- Execute the finite state machine controlling the robot behaviour -->
   <node name="robot_state_machine" pkg="erl_second_assignment" type="state_machine.py" output="screen" required="true"/>
-
-  <!-- Run the node moving the ball  -->
-  <!-- <node name="person_controller" pkg="erl_second_assignment" type="person.py" output="screen"/> -->
 
 </launch>

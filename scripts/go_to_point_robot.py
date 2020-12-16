@@ -28,7 +28,7 @@ yaw_precision_ = math.pi / 9 # +/- 20 degree allowed
 yaw_precision_2_ = math.pi / 90 # +/- 2 degree allowed
 dist_precision_ = 0.1
 kp_a = -3.0
-kp_d = 0.2
+kp_d = 0.5
 ub_a = 0.6
 lb_a = -0.5
 ub_d = 0.6
@@ -99,7 +99,8 @@ def go_straight_ahead(des_pos):
 	
     if err_pos > dist_precision_:
         twist_msg = Twist()
-        twist_msg.linear.x = 0.3
+        twist_msg.linear.x = 0.6
+        # twist_msg.linear.x = kp_d * (des_pos.x-position_.x)
         if twist_msg.linear.x > ub_d:
             twist_msg.linear.x = ub_d
         

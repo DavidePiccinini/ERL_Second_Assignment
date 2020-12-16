@@ -19,10 +19,9 @@ pos = PoseStamped()
 ##
 #
 def moveBall():
-
     # Get a random location on the plane
-    x = random.randint(-7, 7)
-    y = random.randint(-7, 7)
+    x = random.randint(-7, 0)
+    y = random.randint(0, 7)
 
     pos.pose.position.x = x
     pos.pose.position.y = y
@@ -45,7 +44,6 @@ def moveBall():
 ##
 # 
 def disappearBall():
-
     # Make the ball go under the plane
     pos.pose.position.x = 0
     pos.pose.position.y = 0
@@ -63,7 +61,7 @@ def disappearBall():
     # Wait until the ball has reached the destination
     actC.wait_for_result()
 
-    time.sleep(30)
+    time.sleep(20)
 
 ##
 # 
@@ -78,8 +76,6 @@ def person():
             moveBall()
         else:
             disappearBall()
-
-        # time.sleep(20)
 
 
 if __name__ == "__main__":

@@ -49,9 +49,8 @@ robotStopped = False
 def checkForBall(ros_data):
     global ballFound
 
-    # Direct conversion to CV2
-    np_arr = np.fromstring(ros_data.data, np.uint8)
-    image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)  # OpenCV >= 3.0:
+    np_arr = np.frombuffer(ros_data.data, np.uint8)
+    image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
     greenLower = (50, 50, 20)
     greenUpper = (70, 255, 255)
@@ -65,9 +64,8 @@ def checkForBall(ros_data):
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
-    # Only proceed if at least one contour was found
     if len(cnts) > 0:
-        # Set the flag to True
+        # The robot has seen the ball
         ballFound = True
 
 ## 
@@ -76,9 +74,12 @@ def trackBall(ros_data):
     global ballFound
     global robotStopped
     global velPub
+
+    if robotStopped == True:
+        return
     
-    np_arr = np.fromstring(ros_data.data, np.uint8)
-    image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)  # OpenCV >= 3.0:
+    np_arr = np.frombuffer(ros_data.data, np.uint8)
+    image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
     greenLower = (50, 50, 20)
     greenUpper = (70, 255, 255)
@@ -104,16 +105,22 @@ def trackBall(ros_data):
         if radius > 10:
             vel = Twist()
             vel.angular.z = 0.002*(center[0]-400)
-            vel.linear.x = 0.01*(radius-100)
+            vel.linear.x = -0.01*(radius-100)
 
-            if vel.linear.x == 0 and vel.angular.z == 0:
+            if vel.linear.x > 0.6:
+                vel.linear.x = 0.6
+            elif vel.linear.x < -0.6:
+                vel.linear.x = -0.6
+
+            if (abs(vel.linear.x) <= 0.1) and (abs(vel.angular.z) <= 0.1):
                 # The robot has stopped
                 robotStopped = True
+                return
 
             velPub.publish(vel)
 
     else:
-        # Set the flag to False
+        # The robot doesn't see the ball
         ballFound = False
 
 
@@ -136,19 +143,21 @@ class Normal(smach.State):
         global imageSub
         global pos
 
+        # Subscribe to the image topic to check if the robot sees the ball
         imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, checkForBall,  queue_size=1)
 
         while sleepCounter < self.sleepThreshold:
             # Get a random location on the plane
-            x = random.randint(-7, 7)
-            y = random.randint(-7, 7)
+            x = random.randint(-7, 0)
+            y = random.randint(0, 7)
 
             pos.pose.position.x = x
             pos.pose.position.y = y
-            pos.pose.orientation.w = 0
 
             # Create the goal
             goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
+
+            print("NORMAL state: the robot is moving to position [%d, %d].\n" %(x, y))
 
             # Send the goal
             actC.send_goal(goal)
@@ -170,6 +179,9 @@ class Normal(smach.State):
 
             # Increment the counter
             sleepCounter += 1
+
+        # Unsubscribe to the image topic
+        imageSub.unregister()
 
         # Go into the SLEEP state
         print('NORMAL state: The robot is sleepy.\n')
@@ -194,7 +206,6 @@ class Sleep(smach.State):
 
         pos.pose.position.x = x
         pos.pose.position.y = y
-        pos.pose.orientation.w = 0
 
         # Create the goal
         goal = erl_second_assignment.msg.PlanningGoal(target_pose=pos)
@@ -209,7 +220,7 @@ class Sleep(smach.State):
 
         # Sleep for a random amount of seconds
         #time.sleep(random.randint(10, 15))
-        time.sleep(5)
+        time.sleep(10)
 
         # Go back to the NORMAL state
         sleepCounter = 0
@@ -222,62 +233,80 @@ class Play(smach.State):
     def __init__(self):
         smach.State.__init__(self, outcomes=['stopplaying'])
 
-        # Threshold
-        # self.idleThreshold = random.randint(30, 40)
-        # self.idleThreshold = 5
-
     def execute(self, userdata):
         print('State machine: Executing state PLAY.\n')
 
         global sleepCounter
         global ballFound
+        global robotStopped
         global imageSub
         global headJointPub
+        global velPub
 
-        imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall, queue_size=1)
-        headJointPub = rospy.Publisher("robot/joint1_position_controller/command", Float64, queue_size=1)
+        # Subscribe to the image topic to track the ball
+        imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall)
 
-        # Keep incrementing the time counter if the robot doesn't see the ball
-        while not rospy.is_shutdown():
+        while True:
             # Check if the velocity of the robot is 0: if so, move the head
             if robotStopped == True:
-                imageSub.unregister()
+                # Stop receiving images temporarily
+                # imageSub.unregister()
+
+                vel = Twist()
+                vel.angular.z = 0
+                vel.linear.x = 0
+                velPub.publish(vel)
 
                 angle = Float64()
                 angle.data = 0.0
 
-                while angle > -(math.pi/4):
-                    angle.data = angle.data - 0.1
-                    headJointPub.publish(angle)
-                    time.sleep(0.001)
-                time.sleep(2)
+                print("PLAY state: rotating the camera to the left.\n")
 
-                while angle < (math.pi/4):
+                # Move the head to the left and stay there for some seconds
+                while angle.data < (math.pi/4):
                     angle.data = angle.data + 0.1
                     headJointPub.publish(angle)
-                    time.sleep(0.001)
+                    time.sleep(1)
                 time.sleep(2)
 
-                while angle > 0:
+                print("PLAY state: rotating the camera to the right.\n")
+
+                # Move the head to the right and stay there for some seconds
+                while angle.data > -(math.pi/4):
                     angle.data = angle.data - 0.1
                     headJointPub.publish(angle)
-                    time.sleep(0.001)
+                    time.sleep(1)
                 time.sleep(2)
 
-                robotStopped = False
-                imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall, queue_size=1)
+                print("PLAY state: rotating the camera to the center.\n")
 
+                # Move the head to the center
+                while angle.data < 0:
+                    angle.data = angle.data + 0.1
+                    headJointPub.publish(angle)
+                    time.sleep(1)
+
+                print("PLAY state: finished rotating the camera.\n")
+
+                robotStopped = False
+                sleepCounter += 1
+                # imageSub = rospy.Subscriber("robot/camera1/image_raw/compressed", CompressedImage, trackBall)
+
+            # If the robot doesn't see the ball for a certain period of time then go back to the NORMAL state
             if ballFound == False:
-                # time.sleep(1)
-                # idleTime += 1
                 startingTime = time.time()
+
             while ballFound == False:
-                if (time.time() - startingTime) >= 5:
-                    # Go back to the NORMAL state
+                if (time.time() - startingTime) >= 10:
+                    robotStopped = False
+
+                    # Unsubscribe to the image topic
                     imageSub.unregister()
 
+                    # Go back to the NORMAL state
                     print("PLAY state: The robot hasn't seen the ball for a while, so it stops playing.\n")
                     return 'stopplaying'
+        time.sleep(1)
         
         
 
@@ -287,10 +316,16 @@ def main():
     rospy.init_node('robot_behaviour', anonymous=True)
 
     global actC
+    global headJointPub
+    global velPub
 
     # Create the action client and wait for the server
     actC = actionlib.SimpleActionClient("robot/reaching_goal", erl_second_assignment.msg.PlanningAction)
     actC.wait_for_server()
+
+    # Initialize the two publishers
+    headJointPub = rospy.Publisher("robot/joint1_position_controller/command", Float64, queue_size=1)
+    velPub = rospy.Publisher("robot/cmd_vel", Twist, queue_size=1)
 
     # Create a SMACH state machine
     sm = smach.StateMachine(outcomes=[])

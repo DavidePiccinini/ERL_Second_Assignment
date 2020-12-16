@@ -202,13 +202,12 @@
 	  <child link="link_neck"/> 
 	</joint>
 
-  <joint name="joint_head" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0.25"/>
-    <child link="link_head"/>
-    <parent link="link_neck"/>
-    <axis rpy="0 0 0" xyz="0 0 1"/>
-    <limit effort="10000" velocity="1000"/>
-    <joint_properties damping="1.0" friction="1.0"/>
+  <joint name="joint_head" type="revolute">
+    <axis xyz="0 0 1"/>
+  	<limit effort="1000.0" lower="-6.28" upper="6.28" velocity="0.2"/>
+  	<origin rpy="0 0 0" xyz="0 0 0.25"/>
+  	<parent link="link_neck"/>
+  	<child link="link_head"/>
   </joint> 
 
   <joint name="camera_joint" type="fixed">
