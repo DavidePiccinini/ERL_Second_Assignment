@@ -1,0 +1,44 @@
+\hypertarget{state__machine_8py}{}\doxysection{scripts/state\+\_\+machine.py File Reference}
+\label{state__machine_8py}\index{scripts/state\_machine.py@{scripts/state\_machine.py}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classstate__machine_1_1Normal}{state\+\_\+machine.\+Normal}}
+\begin{DoxyCompactList}\small\item\em Define \mbox{\hyperlink{classstate__machine_1_1Normal}{Normal}} state. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classstate__machine_1_1Sleep}{state\+\_\+machine.\+Sleep}}
+\begin{DoxyCompactList}\small\item\em Define \mbox{\hyperlink{classstate__machine_1_1Sleep}{Sleep}} state. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classstate__machine_1_1Play}{state\+\_\+machine.\+Play}}
+\begin{DoxyCompactList}\small\item\em Define \mbox{\hyperlink{classstate__machine_1_1Play}{Play}} state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespacestate__machine}{state\+\_\+machine}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacestate__machine_a5ee9fea3c4940c04b9e685e4e2a9c353}{state\+\_\+machine.\+check\+For\+Ball}} (ros\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Use Open\+CV to check if the robot camera has detected a ball. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespacestate__machine_ad3a2172b99a111225f39fae176133433}{state\+\_\+machine.\+track\+Ball}} (ros\+\_\+data)
+\begin{DoxyCompactList}\small\item\em Use Open\+CV to check if the robot camera has detected a ball\+: if so, move the robot until the ball is at the center of the image and has a certain radius. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespacestate__machine_a5c680ce705e6052fa07c6cece21743d0}{state\+\_\+machine.\+main}} ()
+\begin{DoxyCompactList}\small\item\em State machine initialization. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacestate__machine_abdf29498cd11ccce76023d7ef8fcbf9c}{state\+\_\+machine.\+actC}} = None
+\begin{DoxyCompactList}\small\item\em Action client. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestate__machine_aa451da44a24807c98b1c1c8b0057f802}{state\+\_\+machine.\+vel\+Pub}} = None
+\begin{DoxyCompactList}\small\item\em Publishers. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestate__machine_a05e0cf73dcb204ea34015c4d528cb3e1}{state\+\_\+machine.\+head\+Joint\+Pub}} = None
+\item 
+\mbox{\hyperlink{namespacestate__machine_af5d076232c59f18f0d27a136b2098bf5}{state\+\_\+machine.\+image\+Sub}} = None
+\begin{DoxyCompactList}\small\item\em Subscriber. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacestate__machine_aa8bd1ef36a1404dde939b9bc6eb3769d}{state\+\_\+machine.\+pos}} = Pose\+Stamped()
+\begin{DoxyCompactList}\small\item\em Goal pose. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{namespacestate__machine_a7208c861d7b3b5dd27f9540663669e19}{state\+\_\+machine.\+sleep\+Counter}} = 0
+\begin{DoxyCompactList}\small\item\em Counter. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{namespacestate__machine_a75e5b1596cf603cc0e5491fee93b6a31}{state\+\_\+machine.\+ball\+Found}} = False
+\begin{DoxyCompactList}\small\item\em Flag to notify that the robot has seen the ball. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{namespacestate__machine_aa457668bd6819a2457fbaa62baff2ae9}{state\+\_\+machine.\+robot\+Stopped}} = False
+\begin{DoxyCompactList}\small\item\em Flag to notify that the robot has stopped. \end{DoxyCompactList}\end{DoxyCompactItemize}

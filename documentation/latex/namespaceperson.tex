@@ -1,0 +1,69 @@
+\hypertarget{namespaceperson}{}\doxysection{person Namespace Reference}
+\label{namespaceperson}\index{person@{person}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespaceperson_ad71c486c30c035de96a63161bd90df45}{move\+Ball}} ()
+\begin{DoxyCompactList}\small\item\em Sends a goal to the ball\textquotesingle{}s action server to move it to a random position. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespaceperson_ae553ce3b73595ade8af08ae46d8633ea}{disappear\+Ball}} ()
+\begin{DoxyCompactList}\small\item\em Makes the ball disappear by making it go under the plane. \end{DoxyCompactList}\item 
+def \mbox{\hyperlink{namespaceperson_a8aeac657c6003d0fadf581549e8e1055}{person}} ()
+\begin{DoxyCompactList}\small\item\em Randomly perfoms one of the two available commands. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceperson_a0938826e480604180b67faf92770f808}{actC}} = None
+\item 
+\mbox{\hyperlink{namespaceperson_a25904e101d3b31b92d9fad6ee880a901}{pos}} = Pose\+Stamped()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Mimics the behaviour of a person controlling the robot. The person can move the ball to a certain goal position or can make it disappear. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceperson_ae553ce3b73595ade8af08ae46d8633ea}\label{namespaceperson_ae553ce3b73595ade8af08ae46d8633ea}} 
+\index{person@{person}!disappearBall@{disappearBall}}
+\index{disappearBall@{disappearBall}!person@{person}}
+\doxysubsubsection{\texorpdfstring{disappearBall()}{disappearBall()}}
+{\footnotesize\ttfamily def person.\+disappear\+Ball (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Makes the ball disappear by making it go under the plane. 
+
+\mbox{\Hypertarget{namespaceperson_ad71c486c30c035de96a63161bd90df45}\label{namespaceperson_ad71c486c30c035de96a63161bd90df45}} 
+\index{person@{person}!moveBall@{moveBall}}
+\index{moveBall@{moveBall}!person@{person}}
+\doxysubsubsection{\texorpdfstring{moveBall()}{moveBall()}}
+{\footnotesize\ttfamily def person.\+move\+Ball (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Sends a goal to the ball\textquotesingle{}s action server to move it to a random position. 
+
+After the ball has reached the destination the person wait some time before issuing another command. \mbox{\Hypertarget{namespaceperson_a8aeac657c6003d0fadf581549e8e1055}\label{namespaceperson_a8aeac657c6003d0fadf581549e8e1055}} 
+\index{person@{person}!person@{person}}
+\index{person@{person}!person@{person}}
+\doxysubsubsection{\texorpdfstring{person()}{person()}}
+{\footnotesize\ttfamily def person.\+person (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Randomly perfoms one of the two available commands. 
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{namespaceperson_a0938826e480604180b67faf92770f808}\label{namespaceperson_a0938826e480604180b67faf92770f808}} 
+\index{person@{person}!actC@{actC}}
+\index{actC@{actC}!person@{person}}
+\doxysubsubsection{\texorpdfstring{actC}{actC}}
+{\footnotesize\ttfamily person.\+actC = None}
+
+\mbox{\Hypertarget{namespaceperson_a25904e101d3b31b92d9fad6ee880a901}\label{namespaceperson_a25904e101d3b31b92d9fad6ee880a901}} 
+\index{person@{person}!pos@{pos}}
+\index{pos@{pos}!person@{person}}
+\doxysubsubsection{\texorpdfstring{pos}{pos}}
+{\footnotesize\ttfamily person.\+pos = Pose\+Stamped()}
+

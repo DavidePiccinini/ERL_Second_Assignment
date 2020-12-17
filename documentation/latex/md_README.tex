@@ -1,0 +1,174 @@
+The second assignment builds on top of the first one\+: we students are now asked to implement a similar robot behaviour on a gazebo-\/simulated pet robot. The robot is akin to a dog, it\textquotesingle{}s a wheeled robot with a neck and a camera-\/equipped head that can rotate\+: it can move randomly, track a ball, move its head and go to sleep.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md2}{}\doxysection{System Architecture}\label{md_README_autotoc_md2}
+\hypertarget{md_README_autotoc_md3}{}\doxysubsection{Component Diagram}\label{md_README_autotoc_md3}
+ 
+
+The software architecture is based on {\bfseries{four main components}}\+:
+
+
+\begin{DoxyItemize}
+\item {\bfseries{Person module}}
+
+This module mimics the behaviour of a person that can either move the ball to a random valid location or make it disappear under the plane.
+
+It implements an action client which randomly sends one of the two types of goals to the $\ast$\char`\"{}go\+\_\+to\+\_\+point\+\_\+ball.\+py\char`\"{}$\ast$ action server\+: the module then waits for the ball to reach its destination and sleeps for some time before sending another goal.
+\item {\bfseries{Finite state machine}}
+
+This component implements a finite state machine using \char`\"{}\+Smach\char`\"{}. It features an action client, two publishers and one subscriber.
+
+The three states, together with the transitions between them, will be further explained in the following paragraph.
+\item {\bfseries{Robot action server}}
+
+This component implements an action server to control the robot. Since it was provided by the professor and I only modified some gains and some print functions, I\textquotesingle{}m not going to further explain how it works in detail.
+\item {\bfseries{Ball action server}}
+
+This component implements an action server to control the ball. As for the robot action server, I\textquotesingle{}m not going over it in detail.
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md4}{}\doxysubsection{State Diagram}\label{md_README_autotoc_md4}
+ 
+
+This is the state diagram that shows how the finite state machine works\+:
+
+When the robot is in {\bfseries{Normal}} state it moves randomly in the plane by sending a goal to the robot action server\+: if at anytime the robot sees the ball, then it switches to the {\itshape Play} state. If instead the robot has performed enough actions (an action is either reaching a location or performing the sequence of camera movements as described in the {\itshape Play} state) then it switches to the {\itshape Sleep} state.
+
+When the robot is in {\bfseries{Sleep}} state, it first reaches the predefined \char`\"{}\+Home\char`\"{} location (-\/5, 7), then stays there for some time and finally wakes up, transitioning back to the {\itshape Normal} state.
+
+When the robot is in {\bfseries{Play}} state, it tracks the ball until it gets close enough\+: when this happens, the robot stays still and rotates its head 45 degrees on the left, then does the same for the right and finally goes back to the center. This behaviour goes on until the ball can\textquotesingle{}t be found for a certain period of time, after which the robot switches back to the {\itshape Normal} state.\hypertarget{md_README_autotoc_md5}{}\doxysubsection{rqt\+\_\+graph}\label{md_README_autotoc_md5}
+ 
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md7}{}\doxysection{R\+O\+S Messages and Parameters}\label{md_README_autotoc_md7}
+Custom R\+OS {\bfseries{messages}} are\+:
+
+
+\begin{DoxyItemize}
+\item {\bfseries{Planning.\+action}}
+
+\`{}\`{}\`{} 
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md8}{}\doxysection{geometry\+\_\+msgs/\+Pose\+Stamped target\+\_\+pose}\label{md_README_autotoc_md8}
+\DoxyHorRuler{0}
+ string stat geometry\+\_\+msgs/\+Pose position \`{}\`{}\`{}
+
+Describes the action that will be used both for the robot action server and the ball one\+: {\ttfamily target\+\_\+pose} represents the \char`\"{}goal\char`\"{}, {\ttfamily stat} and {\ttfamily position} are the \char`\"{}feedback\char`\"{}\+: there\textquotesingle{}s no \char`\"{}result\char`\"{} field.
+
+I haven\textquotesingle{}t defined any custom {\bfseries{R\+OS parameter}}.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md10}{}\doxysection{Packages and File List}\label{md_README_autotoc_md10}
+Going in alphabetical order\+:
+
+
+\begin{DoxyItemize}
+\item {\bfseries{action}}
+\begin{DoxyItemize}
+\item {\ttfamily Planning.\+action}
+
+Action file described above.
+\end{DoxyItemize}
+\item {\bfseries{config}}
+\begin{DoxyItemize}
+\item {\ttfamily motors\+\_\+config.\+yaml}
+
+The file containing the description of the controllers and their parameters.
+\end{DoxyItemize}
+\item {\bfseries{diagrams}}
+\begin{DoxyItemize}
+\item {\ttfamily Component\+\_\+\+Diagram.\+png}, {\ttfamily State\+\_\+\+Diagram.\+png} and {\ttfamily rosgraph.\+png}
+
+The three diagrams shown in this R\+E\+A\+D\+ME file.
+\end{DoxyItemize}
+\item {\bfseries{documentation}}
+\begin{DoxyItemize}
+\item {\bfseries{html}} and {\bfseries{latex}}
+
+Contain the output of {\itshape Doxygen}.
+\item {\ttfamily assignment.\+conf}
+
+Configuration file used to run {\itshape Doxygen}.
+\end{DoxyItemize}
+\item {\bfseries{launch}}
+\begin{DoxyItemize}
+\item {\ttfamily gazebo\+\_\+world.\+launch}
+
+The launchfile which runs the gazebo server and client, the action servers, the finite state machine and spawns the ball, robot and human models.
+\end{DoxyItemize}
+\item {\bfseries{scripts}}
+\begin{DoxyItemize}
+\item {\ttfamily \mbox{\hyperlink{go__to__point__ball_8py}{go\+\_\+to\+\_\+point\+\_\+ball.\+py}}}, {\ttfamily \mbox{\hyperlink{go__to__point__robot_8py}{go\+\_\+to\+\_\+point\+\_\+robot.\+py}}}, {\ttfamily \mbox{\hyperlink{person_8py}{person.\+py}}} and {\ttfamily \mbox{\hyperlink{state__machine_8py}{state\+\_\+machine.\+py}}}
+
+The modules of the architecture, as described in the {\itshape System Architecture} section.
+\end{DoxyItemize}
+\item {\bfseries{urdf}}
+\begin{DoxyItemize}
+\item {\ttfamily ball.\+gazebo}, {\ttfamily ball.\+xacro}, {\ttfamily human.\+urdf}, {\ttfamily robot.\+gazebo} and {\ttfamily robot.\+xacro}
+
+The files which describe the models used for the ball, robot and human.
+\end{DoxyItemize}
+\item {\bfseries{worlds}}
+\begin{DoxyItemize}
+\item {\ttfamily world\+\_\+assignment.\+world}
+\end{DoxyItemize}
+
+The world file in which the simulation environment is defined.
+\item {\ttfamily \mbox{\hyperlink{CMakeLists_8txt}{C\+Make\+Lists.\+txt}}} and {\ttfamily package.\+xml}
+
+Necessary files to compile and run the system nodes.
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md12}{}\doxysection{Installation and Running Procedure}\label{md_README_autotoc_md12}
+First of all, clone this repository inside your R\+OS workspace\textquotesingle{}s $\ast$\char`\"{}/src\char`\"{}$\ast$ folder .
+
+Then, navigate to the $\ast$\char`\"{}/scripts\char`\"{}$\ast$ folder and make the Python scripts executable with\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ chmod +x go\_to\_point\_ball.py}
+\DoxyCodeLine{\$ chmod +x go\_to\_point\_robot.py}
+\DoxyCodeLine{\$ chmod +x person.py}
+\DoxyCodeLine{\$ chmod +x state\_machine.py}
+\end{DoxyCode}
+
+
+Go back to the root folder of your R\+OS workspace and execute\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ catkin\_make}
+\DoxyCodeLine{\$ catkin\_make install}
+\end{DoxyCode}
+
+
+In a separate terminal run\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ roscore}
+\end{DoxyCode}
+
+
+Finally, run the launchfile with this command\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\$ roslaunch erl\_second\_assignment gazebo\_world.launch}
+\end{DoxyCode}
+
+
+After a brief setup period in which gazebo is launched and the models are spawned, on the console you will see the transitions between states, when the robot and the ball reach their destinations, and other feedbacks from the system.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md14}{}\doxysection{System\textquotesingle{}s Features}\label{md_README_autotoc_md14}
+This architecture is an evolution of the first assignment, with some improvements. The person can send commands to the ball ignoring completely the state of the robot, which will work in a reactive way. The requirements have all been satisfied, the person module controls the ball without problems and the finite state machine switches correctly between states. The robot uses the camera information to track the ball and when it stops it performs the requested head movements. Since the robot is a system on its own, if the person module or the ball action server fail or stop working no problems arise since it can still move randomly in the plane. This division makes the overall system modular and robust. An important point is that now the control of the robot motion is achieved via an action server, which is a more flexible, non-\/blocking option with respect to a service/client pattern and features the possibility both to cancel the current goal and to receive a constant feedback. I observed no strange behaviours and the feedback on the console is consistent with what is happening in gazebo.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md16}{}\doxysection{System\textquotesingle{}s Limitations}\label{md_README_autotoc_md16}
+First of all, since we are in fact simulating the robot and its behaviour, we can\textquotesingle{}t guarantee that it will work on a physical robot. I used only 1/4 of the whole arena for debugging purpouses and because the simulation is really slow (most probably due to my computer)\+: a smaller arena makes the head movement sub-\/state more frequent, which doesn\textquotesingle{}t almost happen when moving in a larger area. In this situation, other solutions should be considered. We aren\textquotesingle{}t simulating collisions between ball and robot, so it may happen that the ball passes through the robot model\+: this is both unfeasible and in principle unwanted behaviour. Moreover, the robot can collide with the arena boundaries (it happened that when tracking the ball the robot went backwards and hit the barriers) which can make it fall to the ground. The tracking of the ball isn\textquotesingle{}t perfect, so it may happen that it passes in front of the robot, which triggers the state to switch to \char`\"{}\+Play\char`\"{}, and then it immediately goes out of sight, changing the state again to \char`\"{}\+Normal\char`\"{}. When executing the roslaunch, the setup messages mess up with the initial feedback (e.\+g. the finite state machine, the person)\+: a cleaner way to show the messages to the user should be considered. The robot doesn\textquotesingle{}t show any kind of feedback to the human, such as a colored light. The ball can be recognized and tracked only if it\textquotesingle{}s green.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md18}{}\doxysection{Possible Technical Improvements}\label{md_README_autotoc_md18}
+Right now the robot acts as a reactive system which can\textquotesingle{}t take orders from a human. A nice improvement could be to implement sensing modules that pick up the user\textquotesingle{}s commands and sends them to a processing component\+: in this way the robot could perform other types of actions. The robot\textquotesingle{}s sensing capabilities could be improved to allow it to track any kind of ball, colored or not. In order to improve the robot\textquotesingle{}s navigation and knowledge about the environment, a S\+L\+AM and/or autonomous navigation approach can be implemented.
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md20}{}\doxysection{Authors and Contacts}\label{md_README_autotoc_md20}
+Davide Piccinini matricola S4404040 Emails\+:
+\begin{DoxyItemize}
+\item \href{mailto:piccio98dp@gmail.com}{\texttt{ piccio98dp@gmail.\+com}}
+\item \href{mailto:4404040@studenti.unige.it}{\texttt{ 4404040@studenti.\+unige.\+it}}
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md22}{}\doxysection{Doxygen Documentation}\label{md_README_autotoc_md22}

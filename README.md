@@ -8,7 +8,7 @@ The second assignment builds on top of the first one: we students are now asked 
 ### Component Diagram
 
 <p align="center"> 
-<img src="">
+<img src="https://github.com/DavidePiccinini/ERL_Second_Assignment/blob/master/diagrams/Component_Diagram.png">
 </p>
 
 The software architecture is based on **four main components**:
@@ -36,7 +36,7 @@ The software architecture is based on **four main components**:
 ### State Diagram
 
 <p align="center"> 
-<img src="">
+<img src="https://github.com/DavidePiccinini/ERL_Second_Assignment/blob/master/diagrams/State_Diagram.png">
 </p>
 
 This is the state diagram that shows how the finite state machine works:
@@ -50,7 +50,7 @@ When the robot is in **Play** state, it tracks the ball until it gets close enou
 ### rqt_graph
 
 <p align="center"> 
-<img src="">
+<img src="https://github.com/DavidePiccinini/ERL_Second_Assignment/blob/master/diagrams/rosgraph.png">
 </p>
 
 ---
@@ -84,6 +84,12 @@ Going in alphabetical order:
     - `Planning.action`
     
         Action file described above.
+
+- **config**
+
+    - `motors_config.yaml`
+
+        The file containing the description of the controllers and their parameters.
 
 - **diagrams**
 
@@ -162,56 +168,35 @@ After a brief setup period in which gazebo is launched and the models are spawne
 
 ---
 
-## Working Hypothesis and Environment
-
-The **working hypotheses** are: 
-
-<!-- - The robot has no modules dedicated to sensing, which is considered implicit, thus the commands sent by the user are understood perfectly.
-
-- The person can, at any time, aknowledge exactly what the robot state is and thus sends commands accordingly; e.g. if the robot is in normal state he/she won't point a location.
-
-- The person only sends "play" voice commands or pointing gestures.
-
-- The robot knows the environment, i.e. the map's boundaries, the key locations position and the person position.
-
-- The robot can't switch states when it's moving, reaching a location is considered an atomic action.
-
-- The robot can go anywhere on the map.
-
-- The robot has infinite battery life, it never has to recharge. -->
-
-The **enviroment hypotheses** are:
-
-<!-- - The map is described by two values, `xmax` and `ymax`: it's assumed to be a rectangle starting from the origin O = (0, 0) and having as sides 2D vectors **OX** and **OY**, with X = (xmax, 0) and Y = (0, ymax).
-
-- The environment is free from obstacles.
-
-- The only key location the robot knows is "Home".
-
-- The person position is constant throughout the entire robot operation. -->
-
----
-
 ## System's Features
 
-<!-- The system satisfies all the requirements: the robot can transition corretly between states and executes the expected behaviour. Print functions placed in the components allow the user to monitor the robot and what is the person doing. The robot control also checks if the requested location is consistent with respect to the map's boundaries: if so, the robot moves, otherwise it doesnt.
-Having no sensing makes the system fast and reactive to commands.
-The robot control service can accomodate requests from one or more clients. -->
+This architecture is an evolution of the first assignment, with some improvements. 
+The person can send commands to the ball ignoring completely the state of the robot, which will work in a reactive way.
+The requirements have all been satisfied, the person module controls the ball without problems and the finite state machine switches correctly between states. The robot uses the camera information to track the ball and when it stops it performs the requested head movements.
+Since the robot is a system on its own, if the person module or the ball action server fail or stop working no problems arise since it can still move randomly in the plane. This division makes the overall system modular and robust.
+An important point is that now the control of the robot motion is achieved via an action server, which is a more flexible, non-blocking option with respect to a service/client pattern and features the possibility both to cancel the current goal and to receive a constant feedback. 
+I observed no strange behaviours and the feedback on the console is consistent with what is happening in gazebo.
 
 ---
 
 ## System's Limitations
 
-<!-- The system is dependent on a person which sends fixed commands according to the robot state, but in principle we would like to have a flexible system that can receive a wide range of commands and then reasons about what to do.
-Implementing the robot control as a service has its pros, but a future development may want to make the robot able to transition between states while it's reaching a destination: doing so would require modifying both the finite state machine and the robot control component.
-The code is almost entirely *ad hoc* for the use case considered: the components aren't modular enough to be re-usable for other applications, they would need almost certainly additional work to fit in. -->
+First of all, since we are in fact simulating the robot and its behaviour, we can't guarantee that it will work on a physical robot.
+I used only 1/4 of the whole arena for debugging purpouses and because the simulation is really slow (most probably due to my computer): a smaller arena makes the head movement sub-state more frequent, which doesn't almost happen when moving in a larger area. In this situation, other solutions should be considered.
+We aren't simulating collisions between ball and robot, so it may happen that the ball passes through the robot model: this is both unfeasible and in principle unwanted behaviour.
+Moreover, the robot can collide with the arena boundaries (it happened that when tracking the ball the robot went backwards and hit the barriers) which can make it fall to the ground.
+The tracking of the ball isn't perfect, so it may happen that it passes in front of the robot, which triggers the state to switch to "Play", and then it immediately goes out of sight, changing the state again to "Normal".
+When executing the roslaunch, the setup messages mess up with the initial feedback (e.g. the finite state machine, the person): a cleaner way to show the messages to the user should be considered.
+The robot doesn't show any kind of feedback to the human, such as a colored light.
+The ball can be recognized and tracked only if it's green.
 
 ---
 
 ## Possible Technical Improvements
 
-<!-- A possible improvement would be removing the person component and instead develop two sensing components, one for voice commands and one for pointing gestures, which process respective user inputs and sends them to a reasoning component. The reasoning component would first check if the command is valid, then, depending on the robot's state, send data to the finite state machine. This would improve modularity and re-usability.
-Another improvement would be supporting other types of commands, for example the user could say the name of a key location, e.g. "Home", and the robot would go there. This is related to the reasoning component just mentioned and would require the user to add key locations via the ROS parameter server, which is already possible. -->
+Right now the robot acts as a reactive system which can't take orders from a human. A nice improvement could be to implement sensing modules that pick up the user's commands and sends them to a processing component: in this way the robot could perform other types of actions.
+The robot's sensing capabilities could be improved to allow it to track any kind of ball, colored or not.
+In order to improve the robot's navigation and knowledge about the environment, a SLAM and/or autonomous navigation approach can be implemented.
 
 ---
 
@@ -226,4 +211,4 @@ Emails:
 
 ## Doxygen Documentation
 
-<!-- [Doxygen pdf documentation](https://github.com/DavidePiccinini/ERL_First_Assignment/tree/master/documentation/latex/refman.pdf) -->
+[Doxygen pdf documentation](https://github.com/DavidePiccinini/ERL_Second_Assignment/tree/master/documentation/latex/refman.pdf)
